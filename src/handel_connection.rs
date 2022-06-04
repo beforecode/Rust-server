@@ -2,6 +2,8 @@ use std::io::Read;
 use std::io::Write;
 use crate::TcpStream;
 use std::fs;
+use std::time::Duration;
+use std::thread;
 
 pub fn run(mut stream: TcpStream) {
     // Read incoming requests.
@@ -31,6 +33,10 @@ fn handel_server_response(getrequest: &[u8; 16], buf: &Vec<u8>) -> (String, Stri
 	if buf.starts_with(getrequest) {
 		res = String::from("HTTP/1.1 200 OK");
 		filename = fs::read_to_string("index.html").unwrap();
+	} else if buf.starts_with(b"GET /sleep HTTP/1.1\r\n") {
+		res = String::from("HTTP/1.1 200 OK");
+		filename = fs::read_to_string("index.html").unwrap();
+		thread::sleep(Duration::from_secs(5));        
 	} else {
 		res = String::from("HTTP/1.1 404 NOT FOUND");
 		filename = fs::read_to_string("404.html").unwrap();
